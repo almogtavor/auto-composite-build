@@ -1,0 +1,31 @@
+plugins {
+    id 'java-gradle-plugin'
+    id "com.gradle.plugin-publish" version "1.0.0"
+    id 'idea'
+}
+
+group = 'io.github.almogtavor'
+version = '1.0.0'
+
+
+// Specify plugin properties that apply to the whole publishing bundle (ie. all plugins in the current publication).
+pluginBundle {  // Removed in Gradle 8+
+    vcsUrl = 'https://github.com/almogtavor/auto-composite-build'
+
+    // Individual tags for published plugins; overrides bundle tags for the mentioned plugins.
+    // The keys used to specify the plugins must match the names of the blocks in 'gradlePlugin.plugins' (see below).
+    pluginTags = [
+            autoCompositeBuildPlugin: ['gradle', 'composite-build']
+    ]
+}
+
+gradlePlugin {
+    plugins {
+        autoCompositeBuildPlugin {
+            id = 'auto-composite-build'
+            implementationClass = 'io.github.almogtavor.AutoCompositeBuildPlugin'
+            displayName = 'A Gradle plugin to automate the process of working with composite builds'
+            description = 'This Gradle plugin let you easily use composite build within a team.'
+        }
+    }
+}
