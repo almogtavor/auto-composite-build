@@ -8,7 +8,7 @@ all the participants' computers need to clone the common logic project & the pro
 Let's assume one computer #1 cloned project `common-logic` to `C:\\code\common-logic` and uses it in `C:\\code\service1`.
 ```
 computer #1
-└── C:\\
+└── C
     └── code
         ├── common-logic
         └── service1
@@ -18,7 +18,7 @@ or `include("C:\\code\common-logic")` on `settings.gradle`.
 <br>Another had the following hierarchy.
 ```
 computer #2
-└── C:\\
+└── C
     ├── my-code
     │   └── common-logic
     └── service1
@@ -32,7 +32,7 @@ The Auto Composite Build plugin registers `common-logic` to a global file inside
 Projects can query the module from the file, and it doesn't matter the structure of the projects on the developer's computer.
 ```
 computer #1
-└── C:\\
+└── C
     ├── my-code
     │   └── common-logic
     ├── service1
