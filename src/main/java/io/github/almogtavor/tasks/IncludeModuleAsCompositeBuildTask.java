@@ -62,8 +62,9 @@ public class IncludeModuleAsCompositeBuildTask extends DefaultTask {
                 boolean isModuleExists = addModuleToListIfExists(listOfModulesPathsToInclude, module, lines);
                 if (!isModuleExists) {
                     getLogger().log(LogLevel.ERROR,
-                            String.format("Module does not exists in the \"$USER_HOME\\%s\\%s\" file. " +
+                            String.format("Module %s does not exists in the \"$USER_HOME\\%s\\%s\" file. " +
                                           "Configure it properly and re-run the task.",
+                                    module,
                                     GIT_DETAILS_DIR,
                                     GIT_DETAILS_FILE_NAME));
                 }

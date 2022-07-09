@@ -1,4 +1,4 @@
-#🏗️ Auto Composite Build
+# 🏗️ Auto Composite Build
 
 A Gradle plugin that can be used to prevent the paths references problem of the Gradle's composite build feature.
 Currently, composite builds works in such way that if a team uses this for a common logic project,
@@ -49,7 +49,7 @@ computer #1
 `build.gradle`
 ```kotlin
 plugins {
-    id ("auto-composite-build") version ("1.0-SNAPSHOT")
+    id ("io.github.almogtavor.auto-composite-build") version "1.0.2"
 }
 
 autoCompositeBuild {
@@ -83,7 +83,7 @@ if (file(compositeBuildFileName).exists()) {
 `build.gradle`
 ```groovy
 plugins {
-    id "auto-composite-build" version "1.0.0"
+    id "io.github.almogtavor.auto-composite-build" version "1.0.2"
 }
 
 autoCompositeBuild {
@@ -99,7 +99,9 @@ if (file(compositeBuildFileName).exists()) {
     apply from: compositeBuildFileName
     if (modulesPaths != null) {
         for (modulePath in modulesPaths) {
-            includeBuild(modulePath)
+            if (new File(modulePath.toString()).exists()) {
+                includeBuild(modulePath)
+            }
         }
     }
 }
