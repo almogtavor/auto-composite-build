@@ -1,4 +1,4 @@
-# 🏗️ Auto Composite Build
+# 🏗️ Auto Composite Build Gradle Plugin
 
 A Gradle plugin that can be used to prevent the paths references problem of the Gradle's composite build feature.
 Currently, composite builds works in such way that if a team uses this for a common logic project,
