@@ -49,7 +49,7 @@ computer #1
 `build.gradle`
 ```kotlin
 plugins {
-    id ("io.github.almogtavor.auto-composite-build") version "1.0.2"
+    id ("io.github.almogtavor.auto-composite-build") version "1.0.3"
 }
 
 autoCompositeBuild {
@@ -83,7 +83,7 @@ if (file(compositeBuildFileName).exists()) {
 `build.gradle`
 ```groovy
 plugins {
-    id "io.github.almogtavor.auto-composite-build" version "1.0.2"
+    id "io.github.almogtavor.auto-composite-build" version "1.0.3"
 }
 
 autoCompositeBuild {
