@@ -1,1 +1,20 @@
+plugins {
+    id "org.danilopianini.gradle-pre-commit-git-hooks" version "1.0.18"
+}
 rootProject.name = 'auto-composite-build'
+
+
+gitHooks { extension ->
+    extension.with {
+        commitMsg { context ->
+            context.with {
+                conventionalCommits { conventionalCommits ->
+                    conventionalCommits.with {
+                        defaultTypes()
+                    }
+                }
+            }
+        }
+        createHooks(true)
+    }
+}

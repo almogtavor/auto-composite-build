@@ -1,21 +1,22 @@
 plugins {
     id 'java-gradle-plugin'
     id "com.gradle.plugin-publish" version "1.0.0"
+    id 'se.bjurr.gitchangelog.git-changelog-gradle-plugin' version '1.73.0'
     id 'idea'
 }
 
 group = 'io.github.almogtavor'
-version = '1.0.3'
+version = '1.0.4'
 
 
 pluginBundle {
-    website = 'https://github.com/almogtavor'
+    website = 'https://github.com/almogtavor/auto-composite-build'
     vcsUrl = 'https://github.com/almogtavor/auto-composite-build'
 
     // Individual tags for published plugins; overrides bundle tags for the mentioned plugins.
     // The keys used to specify the plugins must match the names of the blocks in 'gradlePlugin.plugins' (see below).
     pluginTags = [
-            autoCompositeBuildPlugin: ['composite-build']
+            autoCompositeBuildPlugin: ['composite-build', 'multiproject']
     ]
 }
 

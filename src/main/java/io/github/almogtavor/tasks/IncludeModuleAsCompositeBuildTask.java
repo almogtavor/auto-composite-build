@@ -23,6 +23,7 @@ import java.util.stream.Stream;
 
 import static io.github.almogtavor.GradleFilesWriter.DROP_LINE;
 import static io.github.almogtavor.utils.AutoCompositeBuildConstants.*;
+import static io.github.almogtavor.utils.GitDetailsUtils.getLocalGitDetailsFile;
 
 public class IncludeModuleAsCompositeBuildTask extends DefaultTask {
     private AutoCompositeBuildExtension autoCompositeBuildExtension;
@@ -39,16 +40,18 @@ public class IncludeModuleAsCompositeBuildTask extends DefaultTask {
     @TaskAction
     public void includeModulesAsCompositeBuild() {
         Optional.ofNullable(autoCompositeBuildExtension.getModulesNames()).ifPresentOrElse(modules -> {
-            File localGitDetailsFile = GitDetailsUtils.getLocalGitDetailsFile();
+            File localGitDetailsFile = getLocalGitDetailsFile();
             List<String> listOfModulesPathsToInclude = new ArrayList<>();
             fillListOfModulesPathsToInclude(modules, listOfModulesPathsToInclude, localGitDetailsFile);
             try {
+                if (autoCompositeBuildExtension.getDslLang() == null) {
+                    autoCompositeBuildExtension.setDslLang(DslLang.GROOVY);
+                }
                 addModulesPathsToCompositeBuildGradleFile(listOfModulesPathsToInclude);
             } catch (IOException e) {
                 getLogger().log(LogLevel.ERROR, String.format("No module defined. " +
-                                                              "Make sure to have a \"$USER_HOME\\%s\\%s\" file configured and re-run the task.",
-                        GIT_DETAILS_DIR,
-                        GIT_DETAILS_FILE_NAME));
+                                                              "Make sure to have a \"%s\" file configured and re-run the task.",
+                        getLocalGitDetailsFile()));
                 e.printStackTrace();
             }
             addCompositeBuildGradleFileToGitIgnore();

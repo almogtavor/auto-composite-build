@@ -110,7 +110,8 @@ if (file(compositeBuildFileName).exists()) {
 ## Available Tasks
 
 * `./gradlew addRepoToGitDetails` - Adds the current repository to the local `.gradle-auto-composite-build` folder.<br>
-    **You should run this task for every project you'd like to include as composite build.**
+    **You should run this task for every project you'd like to include as composite build.** 
+    It is recommended to attach this task to some default tasks like `./gradlew build` and this way easily ensure every project will run it.
 * `./gradlew includeModulesAsCompositeBuilds` - This task generates the `composite-build.gradle` or `composite-build.gradle.kts`
     that holds the paths for the modules that should be included.<br>
     This task must run only after you've run `addRepoToGitDetails` in all the modules that you've configured to include.
@@ -121,4 +122,4 @@ if (file(compositeBuildFileName).exists()) {
 
 In case of moving the path of the repository of a module that is included as a composite build, the plugin will throw an error.
 To get away with this you should rerun the `./gradlew addRepoToGitDetails` task.
-In edge cases there's `./gradlew deleteGitDetails` which will allow you to delete your local's `git.details` file.
+In edge cases there's a `./gradlew deleteGitDetails` task which will allow you to delete your local's `git.details` file.

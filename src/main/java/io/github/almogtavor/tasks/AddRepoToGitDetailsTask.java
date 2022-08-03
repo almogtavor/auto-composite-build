@@ -15,7 +15,7 @@ import java.nio.file.Paths;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class GitDetailsTask extends DefaultTask {
+public class AddRepoToGitDetailsTask extends DefaultTask {
 
     @TaskAction
     public void addProjectToGitDetails() {
@@ -23,15 +23,17 @@ public class GitDetailsTask extends DefaultTask {
         String currentGitRepoPath = GitDetailsUtils.getCurrentGitRepoPath();
         createFileIfNotExists(localGitDetailsFile);
         addCurrentGitRepoPathToTheDetailsFile(localGitDetailsFile, currentGitRepoPath);
-        getLogger().log(LogLevel.QUIET, String.format("Local %s path is %s", AutoCompositeBuildConstants.GIT_DETAILS_FILE_NAME , localGitDetailsFile));
-        getLogger().log(LogLevel.QUIET, String.format("The detected local git project path is %s", currentGitRepoPath));
     }
 
     private void addCurrentGitRepoPathToTheDetailsFile(File localGitDetailsFile, String currentGitRepoPath) {
         try (Stream<String> lines = Files.lines(Paths.get(localGitDetailsFile.getAbsolutePath()))) {
             boolean isCurrentGitRepoPathAlreadyWritten = checkIfCurrentGitRepoPathAlreadyWritten(currentGitRepoPath, lines);
             if (!isCurrentGitRepoPathAlreadyWritten) {
+                getLogger().log(LogLevel.QUIET, String.format("Local %s path is %s", AutoCompositeBuildConstants.GIT_DETAILS_FILE_NAME , localGitDetailsFile));
+                getLogger().log(LogLevel.QUIET, String.format("The detected local git project path is %s", currentGitRepoPath));
                 appendCurrentGitRepoPath(localGitDetailsFile, currentGitRepoPath);
+            } else {
+                getLogger().log(LogLevel.QUIET, String.format("This repo - %s already exists in Git details.", currentGitRepoPath));
             }
         } catch (IOException e) {
             getLogger().log(LogLevel.ERROR, "An error occurred while appending data into the " + AutoCompositeBuildConstants.GIT_DETAILS_FILE_NAME + " file. " +
