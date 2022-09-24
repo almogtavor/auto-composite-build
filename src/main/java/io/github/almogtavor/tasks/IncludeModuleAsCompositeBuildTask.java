@@ -1,32 +1,29 @@
 package io.github.almogtavor.tasks;
 
 import io.github.almogtavor.AutoCompositeBuildExtension;
-import io.github.almogtavor.DslLang;
-import io.github.almogtavor.GradleFilesWriter;
 import io.github.almogtavor.utils.GitDetailsUtils;
 import org.gradle.api.DefaultTask;
+import org.gradle.api.initialization.Settings;
 import org.gradle.api.logging.LogLevel;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.TaskAction;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static io.github.almogtavor.GradleFilesWriter.DROP_LINE;
-import static io.github.almogtavor.utils.AutoCompositeBuildConstants.*;
+import static io.github.almogtavor.utils.AutoCompositeBuildConstants.GIT_DETAILS_DIR;
+import static io.github.almogtavor.utils.AutoCompositeBuildConstants.GIT_DETAILS_FILE_NAME;
 import static io.github.almogtavor.utils.GitDetailsUtils.getLocalGitDetailsFile;
 
 public class IncludeModuleAsCompositeBuildTask extends DefaultTask {
     private AutoCompositeBuildExtension autoCompositeBuildExtension;
+    private Settings settings;
 
     @Input
     public AutoCompositeBuildExtension getAutoCompositeBuildExtension() {
@@ -37,33 +34,38 @@ public class IncludeModuleAsCompositeBuildTask extends DefaultTask {
         this.autoCompositeBuildExtension = autoCompositeBuildExtension;
     }
 
-    @TaskAction
-    public void includeModulesAsCompositeBuild() {
-        Optional.ofNullable(autoCompositeBuildExtension.getModulesNames()).ifPresentOrElse(modules -> {
-            File localGitDetailsFile = getLocalGitDetailsFile();
-            List<String> listOfModulesPathsToInclude = new ArrayList<>();
-            fillListOfModulesPathsToInclude(modules, listOfModulesPathsToInclude, localGitDetailsFile);
-            try {
-                if (autoCompositeBuildExtension.getDslLang() == null) {
-                    autoCompositeBuildExtension.setDslLang(DslLang.GROOVY);
-                }
-                addModulesPathsToCompositeBuildGradleFile(listOfModulesPathsToInclude);
-            } catch (IOException e) {
-                getLogger().log(LogLevel.ERROR, String.format("No module defined. " +
-                                                              "Make sure to have a \"%s\" file configured and re-run the task.",
-                        getLocalGitDetailsFile()));
-                e.printStackTrace();
-            }
-            addCompositeBuildGradleFileToGitIgnore();
-        }, () -> getLogger().log(LogLevel.ERROR, "No module defined. " +
-                                                 "Please configure \"modulesNames\" = \"List.of(your-module-name)\" and re-run the task."));
+    @Input
+    public Settings getSettings() {
+        return settings;
     }
 
-    private void fillListOfModulesPathsToInclude(List<String> modules, List<String> listOfModulesPathsToInclude, File localGitDetailsFile) {
-        for (var module : modules) {
-            try (Stream<String> lines = Files.lines(Paths.get(localGitDetailsFile.getAbsolutePath()))) {
-                boolean isModuleExists = addModuleToListIfExists(listOfModulesPathsToInclude, module, lines);
-                if (!isModuleExists) {
+    public void setSettings(Settings settings) {
+        this.settings = settings;
+    }
+
+    @TaskAction
+    public void includeModulesAsCompositeBuild() {
+        if (Optional.ofNullable(autoCompositeBuildExtension.getModulesNames()).isPresent()) {
+            List<String> modules = autoCompositeBuildExtension.getModulesNames();
+            List<String> listOfModulesPathsToInclude = new ArrayList<>();
+            fillListOfModulesPathsToInclude(modules, listOfModulesPathsToInclude);
+            for (String modulePath : listOfModulesPathsToInclude) {
+                settings.includeBuild(modulePath);
+            }
+        } else {
+            getLogger().log(LogLevel.WARN, "No module defined. " +
+                                            "If that's not intentional, please configure autoIncludeBuilds(\"my-first-app\", \"my-second-app\"). " +
+                                           "Or alternatively, configure \"modulesNames\" = \"List.of(your-module-name)\" and re-run the task.");
+        }
+    }
+
+    private void fillListOfModulesPathsToInclude(List<String> modules, List<String> listOfModulesPathsToInclude) {
+        for (String module : modules) {
+            try (Stream<String> localReposPaths = Files.lines(Paths.get(getLocalGitDetailsFile().getAbsolutePath()))) {
+                Optional<String> localRepoPath = GitDetailsUtils.getModulePath(module, localReposPaths.collect(Collectors.toList()));
+                if (localRepoPath.isPresent()) {
+                    listOfModulesPathsToInclude.add(localRepoPath.get());
+                } else {
                     getLogger().log(LogLevel.ERROR,
                             String.format("Module %s does not exists in the \"$USER_HOME\\%s\\%s\" file. " +
                                           "Configure it properly and re-run the task.",
@@ -79,62 +81,5 @@ public class IncludeModuleAsCompositeBuildTask extends DefaultTask {
                 e.printStackTrace();
             }
         }
-    }
-
-    private void addCompositeBuildGradleFileToGitIgnore() {
-        String gitIgnorePath = GitDetailsUtils.getCurrentGitRepoPath() + File.separator + ".gitignore";
-        File gitIgnoreFile = new File(gitIgnorePath);
-        if (gitIgnoreFile.exists()) {
-            try {
-                String gitIgnoreContent = Files.readString(Path.of(gitIgnorePath));
-                if (!gitIgnoreContent.contains(COMPOSITE_BUILD_GRADLE_GROOVY_FILE_NAME)) {
-                    Files.write(Paths.get(gitIgnorePath),
-                            (DROP_LINE + (autoCompositeBuildExtension.getDslLang() == DslLang.GROOVY ?
-                                    COMPOSITE_BUILD_GRADLE_GROOVY_FILE_NAME :
-                                    COMPOSITE_BUILD_GRADLE_KOTLIN_FILE_NAME)).getBytes(),
-                            StandardOpenOption.APPEND);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    private boolean addModuleToListIfExists(List<String> listOfModulesPathsToInclude, String module, Stream<String> lines) {
-        for (String line : lines.collect(Collectors.toList())) {
-            if (Path.of(line).getFileName().toString().equals(module) && Files.exists(Path.of(line))) {
-                listOfModulesPathsToInclude.add(line);
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private void addModulesPathsToCompositeBuildGradleFile(List<String> listOfModulesPathsToInclude) throws IOException {
-        DslLang dslLang = Optional.ofNullable(autoCompositeBuildExtension.getDslLang()).orElse(DslLang.GROOVY);
-        File compositeBuildGradleGroovyFile = new File(String.format("%s%s%s", GitDetailsUtils.getCurrentGitRepoPath(),
-                File.separator,
-                COMPOSITE_BUILD_GRADLE_GROOVY_FILE_NAME));
-        File compositeBuildGradleKotlinFile = new File(String.format("%s%s%s", GitDetailsUtils.getCurrentGitRepoPath(),
-                File.separator,
-                COMPOSITE_BUILD_GRADLE_KOTLIN_FILE_NAME));
-        clearFileIfExists(compositeBuildGradleGroovyFile);
-        clearFileIfExists(compositeBuildGradleKotlinFile);
-        if (dslLang == DslLang.GROOVY) {
-            createCompositeBuildFile(compositeBuildGradleGroovyFile, listOfModulesPathsToInclude, dslLang);
-        } else {
-            createCompositeBuildFile(compositeBuildGradleKotlinFile, listOfModulesPathsToInclude, dslLang);
-        }
-    }
-
-    private void createCompositeBuildFile(File compositeBuildGradleGroovyFile, List<String> listOfModulesPathsToInclude, DslLang dslLang) throws IOException {
-        GitDetailsUtils.createFileIfNotExists(compositeBuildGradleGroovyFile, getLogger(), false);
-        new GradleFilesWriter().createCompositeBuildGradleFileFromModulesPaths(listOfModulesPathsToInclude,
-                compositeBuildGradleGroovyFile,
-                dslLang);
-    }
-
-    private void clearFileIfExists(File compositeBuildGradleGroovyFile) throws IOException {
-        if (compositeBuildGradleGroovyFile.exists()) Files.delete(compositeBuildGradleGroovyFile.toPath());
     }
 }

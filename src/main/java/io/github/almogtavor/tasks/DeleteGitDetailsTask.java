@@ -11,12 +11,13 @@ import java.nio.file.Files;
 import java.util.Scanner;
 
 public class DeleteGitDetailsTask extends DefaultTask {
-
     @TaskAction
     public void deleteGitDetails() {
         File localGitDetailsFile = GitDetailsUtils.getLocalGitDetailsFile();
         try {
-            System.out.println("Are you sure you want to delete the Git details file? This will affect all working auto-composite-builds. Respond with (y/n):");
+            getLogger().log(LogLevel.WARN, "Are you sure you want to delete the Git details file? " +
+                                           "This will affect all of the projects using auto-composite-builds. " +
+                                           "Respond with (y/n):");
             Scanner scanner = new Scanner(System.in);
             String userDecision = scanner.next();
             if (userDecision.equals("y") || userDecision.equals("Y")) {

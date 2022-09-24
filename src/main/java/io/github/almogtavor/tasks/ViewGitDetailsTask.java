@@ -15,7 +15,7 @@ public class ViewGitDetailsTask extends DefaultTask {
     public void viewGitDetails() {
         File localGitDetailsFile = GitDetailsUtils.getLocalGitDetailsFile();
         try {
-            getLogger().log(LogLevel.LIFECYCLE, Files.readString(localGitDetailsFile.toPath()));
+            getLogger().log(LogLevel.LIFECYCLE, String.join("\n", Files.readAllLines(localGitDetailsFile.toPath())));
         } catch (IOException e) {
             getLogger().log(LogLevel.ERROR, "Could not delete " + localGitDetailsFile.toPath() + " file. ");
             e.printStackTrace();
