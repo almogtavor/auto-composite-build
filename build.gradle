@@ -1,32 +1,59 @@
+import java.nio.file.Files
+import java.nio.file.Paths
+
 plugins {
-    id 'java-gradle-plugin'
-    id "com.gradle.plugin-publish" version "1.0.0"
-    id 'se.bjurr.gitchangelog.git-changelog-gradle-plugin' version '1.73.0'
-    id 'idea'
+    id("java-gradle-plugin")
+    id("com.gradle.plugin-publish") version "1.0.0"
+    id("se.bjurr.gitchangelog.git-changelog-gradle-plugin") version "1.73.0"
+    id("idea")
+    id("org.gradle.kotlin.kotlin-dsl") version "3.1.0"
 }
 
-group = 'io.github.almogtavor'
-version = '1.0.4'
+group = "io.github.almogtavor"
+version = "1.1.0"
 
+repositories {
+    mavenCentral()
+    maven { url = uri("https://repo.spring.io/milestone") }
+}
+
+dependencies {
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:+")
+    implementation("io.projectreactor.kotlin:reactor-kotlin-extensions:+")
+    implementation("org.jetbrains.kotlin:kotlin-reflect:+")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:+")
+}
 
 pluginBundle {
-    website = 'https://github.com/almogtavor/auto-composite-build'
-    vcsUrl = 'https://github.com/almogtavor/auto-composite-build'
+    website = "https://github.com/almogtavor/auto-composite-build"
+    vcsUrl = "https://github.com/almogtavor/auto-composite-build"
 
     // Individual tags for published plugins; overrides bundle tags for the mentioned plugins.
-    // The keys used to specify the plugins must match the names of the blocks in 'gradlePlugin.plugins' (see below).
-    pluginTags = [
-            autoCompositeBuildPlugin: ['composite-build', 'multiproject']
-    ]
+    // The keys used to specify the plugins must match the names of the blocks in "gradlePlugin.plugins" (see below).
+    tags = Arrays.asList("composite-build", "multiproject")
 }
 
 gradlePlugin {
     plugins {
-        autoCompositeBuildPlugin {
-            id = 'io.github.almogtavor.auto-composite-build'
-            implementationClass = 'io.github.almogtavor.AutoCompositeBuildPlugin'
-            displayName = 'A Gradle plugin to automate the process of working with composite builds'
-            description = 'This Gradle plugin lets you easily use composite build within a team.'
+        create("autoCompositeBuildPlugin") {
+            id = "io.github.almogtavor.auto-composite-build"
+            implementationClass = "io.github.almogtavor.AutoCompositeBuildPlugin"
+            displayName = "A Gradle plugin to automate the process of working with composite builds"
+            description = "This Gradle plugin lets you easily use composite build within a team."
         }
     }
 }
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(8))
+    }
+}
+
+task gitChangelogTask(type: se.bjurr.gitchangelog.plugin.gradle.GitChangelogTask) {
+    fromRepo = file("$projectDir")
+    file = file("CHANGELOG.md");
+    String mustacheFile = getProjectDir().getAbsolutePath() + File.separator + "changelog.mustache"
+    templateContent = String.join("\n", Files.readAllLines(Paths.get(mustacheFile)))
+}
+
