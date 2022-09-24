@@ -31,11 +31,11 @@
 {{/ifCommitType}}
 {{/commits}}
 {{/ifContainsType}}
-{{#ifContainsType commits type='deps'}}
-### 🔨 Dependency Upgrades
+{{#ifContainsType commits type='chore'}}
+### 🔨 Other Upgrades
 
 {{#commits}}
-{{#ifCommitType . type='deps'}}
+{{#ifCommitType . type='chore'}}
 - {{#eachCommitScope .}} **{{.}}** {{/eachCommitScope}} {{{commitDescription .}}} ([{{hash}}](https://github.com/almogtavor/auto-composite-build/commit/{{hashFull}}))
 {{/ifCommitType}}
 {{/commits}}

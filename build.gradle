@@ -17,13 +17,6 @@ repositories {
     maven { url = uri("https://repo.spring.io/milestone") }
 }
 
-dependencies {
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:+")
-    implementation("io.projectreactor.kotlin:reactor-kotlin-extensions:+")
-    implementation("org.jetbrains.kotlin:kotlin-reflect:+")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:+")
-}
-
 pluginBundle {
     website = "https://github.com/almogtavor/auto-composite-build"
     vcsUrl = "https://github.com/almogtavor/auto-composite-build"
