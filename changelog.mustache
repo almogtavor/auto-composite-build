@@ -1,0 +1,53 @@
+# Changelog
+
+{{#tags}}
+{{#ifReleaseTag .}}
+## [{{name}}](https://github.com/almogtavor/auto-composite-build/compare/{{name}}) ({{tagDate .}})
+
+{{#ifContainsType commits type='feat'}}
+### ⭐ Features
+
+{{#commits}}
+{{#ifCommitType . type='feat'}}
+- {{#eachCommitScope .}} **{{.}}** {{/eachCommitScope}} {{{commitDescription .}}} ([{{hash}}](https://github.com/almogtavor/auto-composite-build/commit/{{hashFull}}))
+{{/ifCommitType}}
+{{/commits}}
+{{/ifContainsType}}
+{{#ifContainsType commits type='fix'}}
+### 🐞 Bug Fixes
+
+{{#commits}}
+{{#ifCommitType . type='fix'}}
+- {{#eachCommitScope .}} **{{.}}** {{/eachCommitScope}} {{{commitDescription .}}} ([{{hash}}](https://github.com/almogtavor/auto-composite-build/commit/{{hashFull}}))
+{{/ifCommitType}}
+{{/commits}}
+{{/ifContainsType}}
+{{#ifContainsType commits type='docs'}}
+### 📔 Documentation
+
+{{#commits}}
+{{#ifCommitType . type='docs'}}
+- {{#eachCommitScope .}} **{{.}}** {{/eachCommitScope}} {{{commitDescription .}}} ([{{hash}}](https://github.com/almogtavor/auto-composite-build/commit/{{hashFull}}))
+{{/ifCommitType}}
+{{/commits}}
+{{/ifContainsType}}
+{{#ifContainsType commits type='deps'}}
+### 🔨 Dependency Upgrades
+
+{{#commits}}
+{{#ifCommitType . type='deps'}}
+- {{#eachCommitScope .}} **{{.}}** {{/eachCommitScope}} {{{commitDescription .}}} ([{{hash}}](https://github.com/almogtavor/auto-composite-build/commit/{{hashFull}}))
+{{/ifCommitType}}
+{{/commits}}
+{{/ifContainsType}}
+{{#ifContainsType commits type='refactor'}}
+### 🏗️ Refactors
+
+{{#commits}}
+{{#ifCommitType . type='refactor'}}
+- {{#eachCommitScope .}} **{{.}}** {{/eachCommitScope}} {{{commitDescription .}}} ([{{hash}}](https://github.com/almogtavor/auto-composite-build/commit/{{hashFull}}))
+{{/ifCommitType}}
+{{/commits}}
+{{/ifContainsType}}
+{{/ifReleaseTag}}
+{{/tags}}
