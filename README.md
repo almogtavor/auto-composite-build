@@ -3,6 +3,7 @@
 A Gradle plugin that can be used to prevent the paths references problem of the Gradle's composite build feature.
 Currently, composite builds works in such way that if a team uses this for a common logic project,
 all the participants' computers need to clone the common logic project & the projects that use it in the exact same way.
+Using Auto Composite Build allows using Gradle's composite builds feature in a Git compatible way.
 
 ### A demonstration for the problem of Gradle's composite build:
 Let's assume one computer #1 cloned project `common-logic` to `C:\\code\common-logic` and uses it in `C:\\code\service1`.
@@ -44,82 +45,63 @@ computer #1
 
 ## Usage
 
+Auto Composite build has compiled with JDK 1.8 for backward compatibility.
+
 #### Kotlin DSL
-
-`build.gradle`
-```kotlin
-plugins {
-    id ("io.github.almogtavor.auto-composite-build") version "1.0.3"
-}
-
-autoCompositeBuild {
-    modulesNames = listOf("my-first-app", "my-second-app")
-    dslLang = io.github.almogtavor.DslLang.KOTLIN
-}
-```
 
 In the kotlin-based `settings.gradle.kts`:
 ```kotlin
-import java.io.File
+plugins {
+    id ("io.github.almogtavor.auto-composite-build") version "1.1.0"
+}
 
-var compositeBuildFileName = "composite-build.gradle.kts"
-if (file(compositeBuildFileName).exists()) {
-    apply {
-        from(compositeBuildFileName)
-    }
-    if (extra.has("modulesPaths")) {
-        @Suppress("UNCHECKED_CAST")
-        for (modulePath: String in (extra["modulesPaths"] as List<String>)) {
-            if (File(modulePath).exists()) {
-                includeBuild(modulePath)
-            }
-        }
-    }
+autoCompositeBuild {
+    autoIncludeBuilds("my-first-app", "my-second-app")
 }
 ```
 
 #### Groovy DSL
 
-`build.gradle`
+In the groovy-based `settings.gradle`:
 ```groovy
 plugins {
-    id "io.github.almogtavor.auto-composite-build" version "1.0.3"
+    id "io.github.almogtavor.auto-composite-build" version "1.1.0"
 }
 
 autoCompositeBuild {
-    modulesNames = List.of('my-first-app', 'my-second-app')
-    dslLang = "groovy"
-}
-```
-
-In the groovy-based `settings.gradle`:
-```groovy
-def compositeBuildFileName = 'composite-build.gradle'
-if (file(compositeBuildFileName).exists()) {
-    apply from: compositeBuildFileName
-    if (modulesPaths != null) {
-        for (modulePath in modulesPaths) {
-            if (new File(modulePath.toString()).exists()) {
-                includeBuild(modulePath)
-            }
-        }
-    }
+    autoIncludeBuilds("my-first-app", "my-second-app")
 }
 ```
 
 ## Available Tasks
 
-* `./gradlew addRepoToGitDetails` - Adds the current repository to the local `.gradle-auto-composite-build` folder.<br>
-    **You should run this task for every project you'd like to include as composite build.** 
-    It is recommended to attach this task to some default tasks like `./gradlew build` and this way easily ensure every project will run it.
+* `./gradlew addRepoToGitDetails` - Adds the current repository to the local `.auto-composite-build` folder.<br>
+    You should run this task for every project you'd like to include as composite build.
+    This task will run automatically when configuring the Auto Composite Build plugin.
 * `./gradlew includeModulesAsCompositeBuilds` - This task generates the `composite-build.gradle` or `composite-build.gradle.kts`
     that holds the paths for the modules that should be included.<br>
-    This task must run only after you've run `addRepoToGitDetails` in all the modules that you've configured to include.
+    This task must run only after `addRepoToGitDetails` run in all the modules that you've configured to include.
+    This task will run automatically when configuring the Auto Composite Build plugin.
 * `./gradlew deleteGitDetails` - Should not be used. This was implemented only for edge cases. 
-    This task deletes the `git-details` file.
+    This task deletes the `git.details` file (and warns before).
 
 ### Limitations
 
 In case of moving the path of the repository of a module that is included as a composite build, the plugin will throw an error.
 To get away with this you should rerun the `./gradlew addRepoToGitDetails` task.
 In edge cases there's a `./gradlew deleteGitDetails` task which will allow you to delete your local's `git.details` file.
+
+Auto composite build assumes you can add the plugin to the to-be-included project, too.
+If you can't, you can go to the `git.details` and add the to-be-included project's path manually.
+
+### Alternatives
+
+There are two relevant alternatives on this subject, that tries to solve a similar problem at the area of Gradle's composite builds.
+These are:
+- [includegit-gradle-plugin](https://github.com/melix/includegit-gradle-plugin) - 
+    which enables to reference a git repository and a local directory to scan.
+- [includeme](https://github.com/TradeMe/IncludeMe)
+    which will automatically scan the upper directory, of go to further levels if specified.
+Both of these won't let you upload the project to Git when some each user of it places it on another path.
+Auto composite build tries to solve this by assuming you will already clone the to-be-included project, and that you can add this plugin to it too.
+And as said, if not, you can always go to the `git.details` and add its path manually.
