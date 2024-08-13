@@ -1,9 +1,6 @@
 # 🏗️ Auto Composite Build Gradle Plugin
 
-A Gradle plugin that can be used to prevent the paths references problem of the Gradle's composite build feature.
-Currently, composite builds works in such way that if a team uses this for a common logic project,
-all the participants' computers need to clone the common logic project & the projects that use it in the exact same way.
-Using Auto Composite Build allows using Gradle's composite builds feature in a Git compatible way.
+The Auto Composite Build Gradle Plugin is designed to solve the path reference issue that arises when using Gradle's composite build feature. Typically, for a team to use a shared common logic project, all developers must clone both the common logic project and the related projects into identical file paths on their local machines. This can cause issues with path references when sharing projects via version control. The Auto Composite Build plugin eliminates this problem by allowing the use of Gradle's composite builds in a Git-compatible way.
 
 ### A demonstration for the problem of Gradle's composite build:
 Let's assume one computer #1 cloned project `common-logic` to `C:\\code\common-logic` and uses it in `C:\\code\service1`.
